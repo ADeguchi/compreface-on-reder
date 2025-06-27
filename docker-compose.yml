@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  compreface-postgres-db:
+    image: exadel/compreface-postgres-db:1.2.0
+    restart: always
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - compreface-net
+
+  compreface-admin:
+    image: exadel/compreface-admin:1.2.0
+    restart: always
+    environment:
+      - POSTGRES_HOST=compreface-postgres-db
+    depends_on:
+      - compreface-postgres-db
+    networks:
+      - compreface-net
+
+  compreface-api:
+    image: exadel/compreface-api:1.2.0
+    restart: always
+    environment:
+      - POSTGRES_HOST=compreface-postgres-db
+    depends_on:
+      - compreface-admin
+    networks:
+      - compreface-net
+
+  compreface-core:
+    image: exadel/compreface-core:1.2.0
+    restart: always
+    depends_on:
+      - compreface-api
+    networks:
+      - compreface-net
+
+  compreface-ui:
+    image: exadel/compreface-ui:1.2.0
+    restart: always
+    ports:
+      - "8000:80"
+    depends_on:
+      - compreface-core
+    networks:
+      - compreface-net
+
+volumes:
+  db:
+
+networks:
+  compreface-net:
